@@ -1,0 +1,68 @@
+\section{Programming} \label{sec:programming}
+\subsection{Manual Tests}
+After programming, open screen to access the serial port:
+\begin{minted}{bash}
+  screen $SERIALTTY 115200
+\end{minted}
+Press the reset button (the right most button) to make the CPU PC go to the start of BIOS memory.
+
+If all goes well, you should see a \verb|151 >| prompt after pressing return.
+The following commands are available:
+\begin{itemize}
+\item \verb|jal <address>|: Jump to address (hex)
+\item \verb|[sw, sb, sh] <data> <address>|: Store data (hex) to address (hex).
+\item \verb|[lw, lbu, lhu] <address>|: Prints the data at the address (hex).
+\item \verb|run|: Jump to \verb|0x10000000|.
+\end{itemize}
+
+As an example, running \verb|sw cafef00d 10000000| should write to the data memory
+and running \verb|lw 10000000| should print the output \verb|10000000: cafef00d|.
+Please also pay attention that writes to the instruction memory .
+You may try \verb|sw ffffffff 20000000| that writes to the instruction memory,
+where \verb|lw 10000000| still should yield \verb|cafef00d|.
+
+Once you're done, make sure that you close screen using \verb|Ctrl-a| \verb|Shift-k|,
+or other students won't be able to use the serial port!
+If you can't access the serial port you can run \verb|killscreen| to kill all screen sessions.
+
+\subsection{Loading Software Programs}
+In addition to the command interface,
+the BIOS allows you to load programs to the CPU.
+With {\bf screen closed}, run:
+\begin{minted}{bash}
+  ./scripts/hex_to_serial.py <hex_file>
+\end{minted}
+This script stores the hex file to the subsequent addresses from \verb|0x30000000|,
+which means data is written to both the data and instruction memories.
+You may first try loading the echo program by
+\begin{minted}{bash}
+  ./scripts/hex_to_serial.py ../software/echo/echo.hex
+\end{minted}
+
+Then, jump to the loaded instructions in your screen session by \verb|run|.
+It is just an alias of \verb|jal 10000000|.
+In this case, as you loaded the echo program, you should see the characters you typed
+sent back and printed on your screen.
+
+After you make sure that your FPGA are executing the loaded program correctly,
+reset your FPGA (the rightmost button) and try the mmult program
+in \verb|../software/benchmark/mmult/mmult.hex|.
+For running benchmark programs, you can use another script:
+\begin{minted}{bash}
+  ./script/run_fpga.py <hex_file>
+\end{minted}
+For \verb|mmult|, run \verb|./script/run_fpga.py ../software/benchmark/mmult/mmult.hex|.
+
+This internally calls \verb|hex_to_serial.py| and issues \verb|run| command to begin execution.
+It will display the results from the serial tx line to stdout if the program successfully finishes.
+
+The \verb|mmult| program computes $S=AB$, where $A$ and $B$ are $64 \times 64$ matrices.
+The program will print a checksum and the counters discussed in Memory Mapped IO.
+The correct checksum is \verb|0001f800|.
+If nothing printed out, there is likely a problem in your CPU with one of the instructions that is used by the BIOS but not mmult.
+
+The program will also output the values of your instruction and cycle counters (in hex).
+These can be used to calculate the CPI for this program.
+
+
+\newpage
