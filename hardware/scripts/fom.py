@@ -107,7 +107,7 @@ fmax_weight = 1
 cpi_weight = 1
 cost_weight = 0.5
 
-fom = (1000000.0 * (fmax ** fmax_weight)) / (cpi ** cpi_weight) / (cost ** cost_weight)
+fom = (1000.0 * (fmax ** fmax_weight)) / (cpi ** cpi_weight) / (cost ** cost_weight)
 
 print('')
 print('Fmax: ' + str(fmax))

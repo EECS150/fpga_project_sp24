@@ -5,6 +5,18 @@ import argparse
 
 def get_fmax(f):
   for line in f:
+    if line.startswith('| Design Timing Summary'):
+      next(f)
+      line = next(f).strip()
+      while not(line.startswith('WNS')):
+        line = next(f).strip()
+      next(f)
+      line = next(f)
+      x = line.split()
+      wns = float(x[0])
+      if wns < 0:
+        print(f"ERROR: Negative slack. Timing violated. WNS(ns) = {wns}")
+
     if line.startswith('| Clock Summary'):
       next(f)
       line = next(f).strip()
